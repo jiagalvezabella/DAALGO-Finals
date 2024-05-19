@@ -1,0 +1,106 @@
+Eight Queens Problem with Zone Exclusion Heuristic
+This approach combines backtracking with a zone exclusion heuristic to prioritize placements that are less likely to lead to dead ends.
+
+1. Problem: Eight Queens
+
+The goal is to place eight queens on an 8x8 chessboard such that no two queens can attack each other (share the same row, column, or diagonal).
+
+2. Algorithm:
+
+a. Data Structures:
+
+board: A 2D array of size 8x8 representing the chessboard (0 for empty, 1 for queen placement).
+b. Zone Exclusion Heuristic:
+
+Define exclusion zones around each placed queen.
+These zones encompass diagonals and the entire column where the queen resides.
+When placing a new queen, prioritize empty cells with fewer existing queens in their exclusion zones.
+c. Steps:
+
+Recursive Backtracking:
+
+solveNQueens(col) function takes the current column index.
+Base Case: If col == 8 (all columns filled), a solution is found. Return true.
+Recursive Case:
+Loop through all rows i in col:
+Check if isSafe(i, col) returns true (no conflicts).
+For each valid row i:
+Calculate a score based on the number of existing queens in the exclusion zone around cell (i, col). Lower score indicates higher priority.
+Prioritize rows with lower scores for queen placement (e.g., using a priority queue).
+Place a queen at board[i][col].
+If solveNQueens(col + 1) returns true (solution found), return true (optional: stop after one solution).
+Backtrack by removing the queen from board[i][col].
+isSafe Function:
+
+Given a row i and column col, check if placing a queen at board[i][col] is safe (no conflicts).
+3. Based From: Dynamic + Own Algorithm
+
+This approach uses a backtracking framework similar to the classic solution but incorporates a heuristic to guide placement decisions. This avoids the overhead of a full dynamic programming table.
+
+4. Sample Code (C#):
+
+C#
+public class EightQueensHeuristic
+{
+    public static int[,] board = new int[8, 8];
+
+    public static bool isSafe(int row, int col)
+    {
+        for (int i = 0; i < col; i++)
+        {
+            if (board[row, i] == 1 || Math.Abs(row - i) == Math.Abs(col - i))
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public static int getExclusionZoneScore(int row, int col)
+    {
+        int score = 0;
+        for (int i = 0; i < col; i++)
+        {
+            if (board[row, i] == 1)
+            {
+                score++; // Queen in the same row
+            }
+            int diagLeft = row - (col - i);
+            int diagRight = row + (col - i);
+            if (diagLeft >= 0 && diagLeft < 8 && board[diagLeft, i] == 1)
+            {
+                score++; // Queen in the left diagonal
+            }
+            if (diagRight >= 0 && diagRight < 8 && board[diagRight, i] == 1)
+            {
+                score++; // Queen in the right diagonal
+            }
+        }
+        return score;
+    }
+
+    public static bool solveNQueens(int col)
+    {
+        if (col == 8)
+        {
+            return true; // All columns filled, solution found
+        }
+
+        // Use a priority queue to prioritize rows with lower exclusion zone scores
+        PriorityQueue<Cell, int> pq = new PriorityQueue<Cell, int>();
+        for (int row = 0; row < 8; row++)
+        {
+            if (isSafe(row, col))
+            {
+                pq.Enqueue(new Cell(row, col), getExclusionZoneScore(row, col));
+            }
+        }
+
+        while (pq.Count > 0)
+        {
+            Cell cell = pq.Dequeue();
+            int row = cell.Row;
+            int col = cell.Col;
+
+            board[row, col] = 1;
+            if (solveNQueens(col + 1
